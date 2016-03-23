@@ -88,7 +88,7 @@ public class CombiningObservablesActivity extends AppCompatActivity {
     private void startCounter() {
         mSubscription.add(Observable
                 .interval(1, TimeUnit.SECONDS)
-                .onBackpressureDrop()
+                .onBackpressureLatest()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {
                     @Override
@@ -100,7 +100,7 @@ public class CombiningObservablesActivity extends AppCompatActivity {
 
         mSubscription.add(Observable
                 .interval(2500, TimeUnit.MILLISECONDS)
-                .onBackpressureDrop()
+                .onBackpressureLatest()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {
                     @Override
@@ -113,7 +113,7 @@ public class CombiningObservablesActivity extends AppCompatActivity {
 
     private void observeZip() {
         mSubscription.add(Observable
-                .zip(mCounterSubject.onBackpressureDrop(), mStringsSubject.onBackpressureDrop(), new Func2<Long, String, String>() {
+                .zip(mCounterSubject.onBackpressureLatest(), mStringsSubject.onBackpressureLatest(), new Func2<Long, String, String>() {
                     @Override
                     public String call(Long aLong, String s) {
                         return ""+aLong+s;
@@ -149,8 +149,8 @@ public class CombiningObservablesActivity extends AppCompatActivity {
     }
 
     private void observeJoin() {
-        mSubscription.add(mStringsSubject
-                .join(mCounterSubject,
+        mSubscription.add(mStringsSubject.onBackpressureLatest()
+                .join(mCounterSubject.onBackpressureLatest(),
                         new Func1<String, Observable<Object>>() {
                             @Override
                             public Observable<Object> call(String s) {
@@ -170,6 +170,7 @@ public class CombiningObservablesActivity extends AppCompatActivity {
                             }
                         }
                 )
+                .onBackpressureLatest()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<String>() {
                     @Override
